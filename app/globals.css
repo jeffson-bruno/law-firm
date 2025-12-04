@@ -1,0 +1,135 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* <CHANGE> Novo tema para o sistema de advocacia com cores especificadas */
+  --background: #ffffff;
+  --foreground: #2c3e50;
+  --card: #ffffff;
+  --card-foreground: #2c3e50;
+  --popover: #ffffff;
+  --popover-foreground: #2c3e50;
+  --primary: #2980b9;
+  --primary-foreground: #ffffff;
+  --secondary: #ecf0f1;
+  --secondary-foreground: #2c3e50;
+  --muted: #bdc3c7;
+  --muted-foreground: #7f8c8d;
+  --accent: #27ae60;
+  --accent-foreground: #ffffff;
+  --destructive: #e74c3c;
+  --destructive-foreground: #ffffff;
+  --border: #bdc3c7;
+  --input: #bdc3c7;
+  --ring: #3498db;
+  --chart-1: #2980b9;
+  --chart-2: #27ae60;
+  --chart-3: #e74c3c;
+  --chart-4: #f39c12;
+  --chart-5: #9b59b6;
+  --radius: 0.5rem;
+  --sidebar: #2c3e50;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #2980b9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #34495e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #34495e;
+  --sidebar-ring: #3498db;
+}
+
+.dark {
+  --background: #1a252f;
+  --foreground: #ecf0f1;
+  --card: #2c3e50;
+  --card-foreground: #ecf0f1;
+  --popover: #2c3e50;
+  --popover-foreground: #ecf0f1;
+  --primary: #3498db;
+  --primary-foreground: #ffffff;
+  --secondary: #34495e;
+  --secondary-foreground: #ecf0f1;
+  --muted: #34495e;
+  --muted-foreground: #95a5a6;
+  --accent: #2ecc71;
+  --accent-foreground: #ffffff;
+  --destructive: #e74c3c;
+  --destructive-foreground: #ffffff;
+  --border: #34495e;
+  --input: #34495e;
+  --ring: #3498db;
+  --chart-1: #3498db;
+  --chart-2: #2ecc71;
+  --chart-3: #e74c3c;
+  --chart-4: #f39c12;
+  --chart-5: #9b59b6;
+  --sidebar: #1a252f;
+  --sidebar-foreground: #ecf0f1;
+  --sidebar-primary: #3498db;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2c3e50;
+  --sidebar-accent-foreground: #ecf0f1;
+  --sidebar-border: #2c3e50;
+  --sidebar-ring: #3498db;
+}
+
+@theme inline {
+  /* <CHANGE> Atualizadas as fontes para Inter e Poppins conforme especificado */
+  --font-sans: "Inter", "Inter Fallback", system-ui, sans-serif;
+  --font-heading: "Poppins", "Poppins Fallback", system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
