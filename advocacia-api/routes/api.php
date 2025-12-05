@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\TipoProcessoController;
 use App\Http\Controllers\Api\ProcessoController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\Api\AgendamentoController;
 use App\Http\Controllers\Api\NotificacaoController;
 use App\Http\Controllers\Api\ReciboPagamentoController;
 
-// Rota de teste simples (opcional)
+// Rota de teste simples
 Route::get('/health-check', function () {
     return response()->json([
         'status' => 'ok',
@@ -20,20 +21,25 @@ Route::get('/health-check', function () {
     ]);
 });
 
-// 👉 Aqui, por enquanto, tudo está PÚBLICO.
-// Depois que implementarmos autenticação (Sanctum/JWT),
-// podemos envolver estas rotas em um grupo com middleware auth:sanctum.
+// Rotas públicas de autenticação
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']); // opcional, pode remover depois
 
-Route::apiResource('clientes', ClienteController::class);
-Route::apiResource('tipos-processos', TipoProcessoController::class);
-Route::apiResource('processos', ProcessoController::class);
-Route::apiResource('lancamentos-financeiros', LancamentoFinanceiroController::class);
-Route::apiResource('documentos-juridicos', DocumentoJuridicoController::class);
-Route::apiResource('tarefas', TarefaController::class);
-Route::apiResource('agendamentos', AgendamentoController::class);
-Route::apiResource('notificacoes', NotificacaoController::class);
-Route::apiResource('recibos', ReciboPagamentoController::class);
+// Rotas protegidas por token Sanctum
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-// Rota extra para download do recibo (BLOB)
-Route::get('recibos/{reciboPagamento}/download', [ReciboPagamentoController::class, 'download'])
-    ->name('recibos.download');
+    Route::apiResource('clientes', ClienteController::class);
+    Route::apiResource('tipos-processos', TipoProcessoController::class);
+    Route::apiResource('processos', ProcessoController::class);
+    Route::apiResource('lancamentos-financeiros', LancamentoFinanceiroController::class);
+    Route::apiResource('documentos-juridicos', DocumentoJuridicoController::class);
+    Route::apiResource('tarefas', TarefaController::class);
+    Route::apiResource('agendamentos', AgendamentoController::class);
+    Route::apiResource('notificacoes', NotificacaoController::class);
+    Route::apiResource('recibos', ReciboPagamentoController::class);
+
+    Route::get('recibos/{reciboPagamento}/download', [ReciboPagamentoController::class, 'download'])
+        ->name('recibos.download');
+});
