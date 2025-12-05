@@ -6,22 +6,40 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('lancamento_financeiros', function (Blueprint $table) {
+        Schema::create('lancamentos_financeiros', function (Blueprint $table) {
             $table->id();
+
+            $table->enum('tipo', ['receber', 'pagar']);
+            $table->string('categoria')->nullable();  // honorarios, custas, etc.
+
+            $table->foreignId('cliente_id')
+                ->nullable()
+                ->constrained('clientes')
+                ->nullOnDelete();
+
+            $table->foreignId('processo_id')
+                ->nullable()
+                ->constrained('processos')
+                ->nullOnDelete();
+
+            $table->string('descricao')->nullable();
+            $table->decimal('valor', 15, 2);
+
+            $table->date('data_vencimento');
+            $table->date('data_pagamento')->nullable();
+
+            $table->enum('status', ['pendente', 'pago', 'atrasado'])->default('pendente');
+
             $table->timestamps();
+
+            $table->index(['tipo', 'status', 'data_vencimento']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('lancamento_financeiros');
+        Schema::dropIfExists('lancamentos_financeiros');
     }
 };

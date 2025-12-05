@@ -6,22 +6,34 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('recibo_pagamentos', function (Blueprint $table) {
+        Schema::create('recibos_pagamentos', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('lancamento_id')
+                ->constrained('lancamentos_financeiros')
+                ->onDelete('cascade');
+
+            $table->string('nome_arquivo');
+            $table->string('mime_type');
+            $table->unsignedBigInteger('tamanho')->nullable();
+
+            // BLOB para conteúdo do comprovante (tamanho moderado)
+            $table->binary('conteudo');
+
+
+            $table->foreignId('uploaded_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('recibo_pagamentos');
+        Schema::dropIfExists('recibos_pagamentos');
     }
 };

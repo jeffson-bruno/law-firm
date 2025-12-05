@@ -6,22 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tipo_processos', function (Blueprint $table) {
+        Schema::create('tipos_processos', function (Blueprint $table) {
             $table->id();
+            $table->string('nome');              // Trabalhista, Cível, Família...
+            $table->string('area')->nullable();  // Cível, Penal, etc.
+            $table->text('descricao')->nullable();
+            $table->boolean('ativo')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tipo_processos');
+        Schema::dropIfExists('tipos_processos');
     }
 };
