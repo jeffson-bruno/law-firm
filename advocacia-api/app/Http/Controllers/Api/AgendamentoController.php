@@ -3,47 +3,75 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Agendamento;
 use Illuminate\Http\Request;
 
 class AgendamentoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Agendamento::with(['cliente', 'usuario']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status); // agendado, cancelado, realizado
+        }
+
+        if ($request->filled('cliente_id')) {
+            $query->where('cliente_id', $request->cliente_id);
+        }
+
+        if ($request->filled('usuario_id')) {
+            $query->where('usuario_id', $request->usuario_id);
+        }
+
+        return response()->json(
+            $query->orderBy('data_hora', 'desc')->paginate(15)
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'cliente_id' => 'required|exists:clientes,id',
+            'usuario_id' => 'nullable|exists:users,id',
+            'data_hora'  => 'required|date',
+            'tipo'       => 'nullable|string|max:255',
+            'status'     => 'nullable|in:agendado,cancelado,realizado',
+            'observacoes'=> 'nullable|string',
+        ]);
+
+        $agendamento = Agendamento::create($data);
+
+        return response()->json($agendamento->load(['cliente', 'usuario']), 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Agendamento $agendamento)
     {
-        //
+        $agendamento->load(['cliente', 'usuario']);
+
+        return response()->json($agendamento);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Agendamento $agendamento)
     {
-        //
+        $data = $request->validate([
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'usuario_id' => 'nullable|exists:users,id',
+            'data_hora'  => 'nullable|date',
+            'tipo'       => 'nullable|string|max:255',
+            'status'     => 'nullable|in:agendado,cancelado,realizado',
+            'observacoes'=> 'nullable|string',
+        ]);
+
+        $agendamento->update($data);
+
+        return response()->json($agendamento->load(['cliente', 'usuario']));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Agendamento $agendamento)
     {
-        //
+        $agendamento->delete();
+
+        return response()->json(null, 204);
     }
 }

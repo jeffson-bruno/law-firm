@@ -3,47 +3,55 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\TipoProcesso;
 use Illuminate\Http\Request;
 
 class TipoProcessoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(
+            TipoProcesso::orderBy('nome')->get()
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nome'      => 'required|string|max:255',
+            'area'      => 'nullable|string|max:255',
+            'descricao' => 'nullable|string',
+            'ativo'     => 'boolean',
+        ]);
+
+        $tipo = TipoProcesso::create($data);
+
+        return response()->json($tipo, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(TipoProcesso $tipoProcesso)
     {
-        //
+        return response()->json($tipoProcesso);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, TipoProcesso $tipoProcesso)
     {
-        //
+        $data = $request->validate([
+            'nome'      => 'sometimes|required|string|max:255',
+            'area'      => 'nullable|string|max:255',
+            'descricao' => 'nullable|string',
+            'ativo'     => 'boolean',
+        ]);
+
+        $tipoProcesso->update($data);
+
+        return response()->json($tipoProcesso);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(TipoProcesso $tipoProcesso)
     {
-        //
+        $tipoProcesso->delete();
+
+        return response()->json(null, 204);
     }
 }
