@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Scale,
   LayoutDashboard,
@@ -30,6 +32,8 @@ const menuItems = [
 ]
 
 export function AdminSidebar({ open }: AdminSidebarProps) {
+  const pathname = usePathname()
+
   return (
     <aside
       className={cn(
@@ -50,20 +54,31 @@ export function AdminSidebar({ open }: AdminSidebarProps) {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
-        {menuItems.map((item, index) => (
-          <a
-            key={index}
-            href={item.href}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-all group"
-          >
-            <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium font-[family-name:var(--font-poppins)]">{item.label}</span>
-          </a>
-        ))}
+        {menuItems.map((item, index) => {
+          const Icon = item.icon
+          const isActive = pathname === item.href
+
+          return (
+            <Link
+              key={index}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-all group",
+                isActive && "bg-sidebar-accent/90 text-sidebar-foreground",
+              )}
+            >
+              <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium font-[family-name:var(--font-poppins)]">{item.label}</span>
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="p-4 border-t border-sidebar-border">
-        <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-all w-full group">
+        <button
+          type="button"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-all w-full group"
+        >
           <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="text-sm font-medium font-[family-name:var(--font-poppins)]">Sair</span>
         </button>
