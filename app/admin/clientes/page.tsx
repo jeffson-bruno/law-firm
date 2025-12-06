@@ -16,10 +16,13 @@ type Cliente = {
   id: number
   nome: string
   cpf_cnpj: string
+  rg?: string | null
   telefone?: string | null
   email?: string | null
+  endereco?: string | null
   cidade?: string | null
   estado?: string | null
+  cep?: string | null
 }
 
 type ClientesResponse = {
@@ -27,6 +30,49 @@ type ClientesResponse = {
   current_page: number
   last_page: number
   total: number
+}
+
+// Funções de máscara
+function maskCpfCnpj(value: string) {
+  const digits = value.replace(/\D/g, "")
+
+  if (digits.length <= 11) {
+    // CPF: 000.000.000-00
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})/, "$1.$2.$3-$4")
+      .slice(0, 14)
+  }
+
+  // CNPJ: 00.000.000/0000-00
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
+    .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d{1,2})/, "$1.$2.$3/$4-$5")
+    .slice(0, 18)
+}
+
+function maskPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11)
+
+  if (digits.length <= 10) {
+    // (00) 0000-0000
+    return digits
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/^(\(\d{2}\)\s)(\d{4})(\d)/, "$1$2-$3")
+  }
+
+  // (00) 00000-0000
+  return digits
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/^(\(\d{2}\)\s)(\d{5})(\d)/, "$1$2-$3")
+}
+
+function maskCep(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8)
+  return digits.replace(/^(\d{5})(\d)/, "$1-$2")
 }
 
 export default function AdminClientesPage() {
@@ -45,10 +91,14 @@ export default function AdminClientesPage() {
   // Formulário de novo cliente
   const [nome, setNome] = useState("")
   const [cpfCnpj, setCpfCnpj] = useState("")
-  const [telefone, setTelefone] = useState("")
+  const [rg, setRg] = useState("")
+  const [endereco, setEndereco] = useState("")
+  const [cidade, setCidade] = useState("")
+  const [cep, setCep] = useState("")
+  const [telefoneWhatsapp, setTelefoneWhatsapp] = useState("")
+  const [telefoneLigacao, setTelefoneLigacao] = useState("")
   const [email, setEmail] = useState("")
 
-  // Buscar lista de clientes
   const fetchClientes = async (page = 1) => {
     setLoading(true)
     setError(null)
@@ -69,7 +119,6 @@ export default function AdminClientesPage() {
       })
 
       if (res.status === 401) {
-        // Token inválido/expirado
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth_token")
           localStorage.removeItem("auth_user")
@@ -115,6 +164,12 @@ export default function AdminClientesPage() {
         return
       }
 
+      // Remover máscaras para salvar "limpo" no banco, se desejar
+      const rawCpfCnpj = cpfCnpj.replace(/\D/g, "")
+      const rawTelefoneWhatsapp = telefoneWhatsapp.replace(/\D/g, "")
+      const rawTelefoneLigacao = telefoneLigacao.replace(/\D/g, "")
+      const rawCep = cep.replace(/\D/g, "")
+
       const res = await fetch(`${API_URL}/api/clientes`, {
         method: "POST",
         headers: {
@@ -124,9 +179,15 @@ export default function AdminClientesPage() {
         },
         body: JSON.stringify({
           nome,
-          cpf_cnpj: cpfCnpj,
-          telefone,
-          email,
+          cpf_cnpj: rawCpfCnpj,
+          rg: rg || null,
+          endereco,
+          cidade,
+          cep: rawCep,
+          telefone: rawTelefoneWhatsapp, // vamos usar telefone como WhatsApp principal
+          email: email || null,
+          // telefoneLigacao por enquanto não temos campo separado no back;
+          // mais pra frente podemos criar um campo específico ou usar 'observacoes'.
         }),
       })
 
@@ -147,10 +208,14 @@ export default function AdminClientesPage() {
       // Se cadastrou, limpa o formulário e recarrega a lista
       setNome("")
       setCpfCnpj("")
-      setTelefone("")
+      setRg("")
+      setEndereco("")
+      setCidade("")
+      setCep("")
+      setTelefoneWhatsapp("")
+      setTelefoneLigacao("")
       setEmail("")
 
-      // Voltar para página 1 (ou recarregar a atual)
       await fetchClientes(1)
     } catch (err: any) {
       console.error(err)
@@ -184,7 +249,6 @@ export default function AdminClientesPage() {
             </div>
           </div>
 
-          {/* Mensagem de erro */}
           {error && (
             <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm border border-red-200">
               {error}
@@ -200,8 +264,8 @@ export default function AdminClientesPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateCliente} className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome</Label>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="nome">Nome *</Label>
                   <Input
                     id="nome"
                     value={nome}
@@ -212,27 +276,81 @@ export default function AdminClientesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
+                  <Label htmlFor="cpfCnpj">CPF/CNPJ *</Label>
                   <Input
                     id="cpfCnpj"
                     value={cpfCnpj}
-                    onChange={(e) => setCpfCnpj(e.target.value)}
-                    placeholder="Somente números"
+                    onChange={(e) => setCpfCnpj(maskCpfCnpj(e.target.value))}
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone</Label>
+                  <Label htmlFor="rg">RG</Label>
                   <Input
-                    id="telefone"
-                    value={telefone}
-                    onChange={(e) => setTelefone(e.target.value)}
-                    placeholder="(00) 00000-0000"
+                    id="rg"
+                    value={rg}
+                    onChange={(e) => setRg(e.target.value)}
+                    placeholder="RG (opcional)"
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="endereco">Endereço *</Label>
+                  <Input
+                    id="endereco"
+                    value={endereco}
+                    onChange={(e) => setEndereco(e.target.value)}
+                    placeholder="Rua, número, complemento"
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="cidade">Cidade *</Label>
+                  <Input
+                    id="cidade"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    placeholder="Cidade"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cep">CEP *</Label>
+                  <Input
+                    id="cep"
+                    value={cep}
+                    onChange={(e) => setCep(maskCep(e.target.value))}
+                    placeholder="00000-000"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="telefoneWhatsapp">Telefone / WhatsApp *</Label>
+                  <Input
+                    id="telefoneWhatsapp"
+                    value={telefoneWhatsapp}
+                    onChange={(e) => setTelefoneWhatsapp(maskPhone(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="telefoneLigacao">Telefone (somente ligação)</Label>
+                  <Input
+                    id="telefoneLigacao"
+                    value={telefoneLigacao}
+                    onChange={(e) => setTelefoneLigacao(maskPhone(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -284,7 +402,7 @@ export default function AdminClientesPage() {
                     </p>
                     {cliente.telefone && (
                       <p className="text-xs text-muted-foreground">
-                        Telefone: {cliente.telefone}
+                        Telefone/WhatsApp: {cliente.telefone}
                       </p>
                     )}
                     {cliente.email && (
@@ -292,16 +410,22 @@ export default function AdminClientesPage() {
                         Email: {cliente.email}
                       </p>
                     )}
-                    {(cliente.cidade || cliente.estado) && (
+                    {cliente.endereco && (
                       <p className="text-xs text-muted-foreground">
-                        {cliente.cidade} {cliente.estado && `- ${cliente.estado}`}
+                        Endereço: {cliente.endereco}
+                      </p>
+                    )}
+                    {(cliente.cidade || cliente.estado || cliente.cep) && (
+                      <p className="text-xs text-muted-foreground">
+                        {cliente.cidade}
+                        {cliente.estado && ` - ${cliente.estado}`}
+                        {cliente.cep && ` • CEP: ${cliente.cep}`}
                       </p>
                     )}
                   </div>
                 ))}
               </div>
 
-              {/* Paginação */}
               {lastPage > 1 && (
                 <div className="flex items-center justify-between mt-4 text-sm">
                   <span className="text-muted-foreground">
