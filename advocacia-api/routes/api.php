@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\TarefaController;
 use App\Http\Controllers\Api\AgendamentoController;
 use App\Http\Controllers\Api\NotificacaoController;
 use App\Http\Controllers\Api\ReciboPagamentoController;
+use App\Http\Controllers\Api\CidadeAtuacaoController;
 
 // Rota de teste simples
 Route::get('/health-check', function () {
@@ -43,3 +44,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('recibos/{reciboPagamento}/download', [ReciboPagamentoController::class, 'download'])
         ->name('recibos.download');
 });
+
+Route::apiResource('cidades-atuacao', CidadeAtuacaoController::class);
