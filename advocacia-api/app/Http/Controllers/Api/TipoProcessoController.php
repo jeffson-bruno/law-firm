@@ -10,9 +10,9 @@ class TipoProcessoController extends Controller
 {
     public function index()
     {
-        return response()->json(
-            TipoProcesso::orderBy('nome')->get()
-        );
+        $tipos = TipoProcesso::orderBy('nome')->paginate(50);
+
+        return response()->json($tipos);
     }
 
     public function store(Request $request)
