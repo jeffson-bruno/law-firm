@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthLoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(AuthLoginRequest $request)
     {
-        $validated = $request->validate([
-            'username' => ['required', 'string', 'min:5', 'max:10'],
-            'password' => ['required', 'string', 'min:8', 'max:16'],
-            'device_name' => ['nullable', 'string', 'max:60'],
-        ]);
+        $validated = $request->validated();
 
-        $rememberDevice = $validated['device_name'] ?? 'web';
+        $deviceName = $validated['device_name'] ?? 'web';
 
         if (!Auth::attempt([
             'username' => $validated['username'],
@@ -30,8 +27,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        // Tokens por sessão/dispositivo: não derruba logins antigos.
-        $token = $user->createToken($rememberDevice)->plainTextToken;
+        $token = $user->createToken($deviceName)->plainTextToken;
 
         return response()->json([
             'token' => $token,
@@ -46,8 +42,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Revoga SOMENTE o token atual
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',
