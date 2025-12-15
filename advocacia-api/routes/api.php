@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Admin\UserPermissionController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CaseController;
 use App\Http\Controllers\Api\CaseDeadlineController;
+use App\Http\Controllers\Api\DashboardController;
 
 Route::prefix('auth')->group(function () {
     
@@ -49,4 +50,8 @@ Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(funct
     Route::get('/case-deadlines/{id}', [CaseDeadlineController::class, 'show']);
     Route::put('/case-deadlines/{id}', [CaseDeadlineController::class, 'update']);
     Route::delete('/case-deadlines/{id}', [CaseDeadlineController::class, 'destroy']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->prefix('dashboard')->group(function () {
+    Route::get('/deadlines-week', [DashboardController::class, 'deadlinesWeek']);
 });
