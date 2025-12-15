@@ -41,4 +41,3 @@ class Client extends Model
         $this->attributes['phone'] = Normalizer::onlyDigits($value);
     }
 }
-
