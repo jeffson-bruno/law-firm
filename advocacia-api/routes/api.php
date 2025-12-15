@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 
 use App\Http\Controllers\Api\Admin\UserPermissionController;
+use App\Http\Controllers\Api\ClientController;
 
 Route::prefix('auth')->group(function () {
     
@@ -22,4 +23,12 @@ Route::middleware(['auth:sanctum', 'finance.access'])->get('/finance/ping', func
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     Route::patch('/users/{id}/finance-access', [UserPermissionController::class, 'updateFinanceAccess']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(function () {
+    Route::get('/clients', [ClientController::class, 'index']);
+    Route::post('/clients', [ClientController::class, 'store']);
+    Route::get('/clients/{id}', [ClientController::class, 'show']);
+    Route::put('/clients/{id}', [ClientController::class, 'update']);
+    Route::delete('/clients/{id}', [ClientController::class, 'destroy']);
 });
