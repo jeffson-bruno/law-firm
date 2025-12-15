@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserPermissionController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CaseController;
+use App\Http\Controllers\Api\CaseDeadlineController;
 
 Route::prefix('auth')->group(function () {
     
@@ -40,4 +41,12 @@ Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(funct
     Route::get('/cases/{id}', [CaseController::class, 'show']);
     Route::put('/cases/{id}', [CaseController::class, 'update']);
     Route::delete('/cases/{id}', [CaseController::class, 'destroy']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(function () {
+    Route::get('/case-deadlines', [CaseDeadlineController::class, 'index']);
+    Route::post('/case-deadlines', [CaseDeadlineController::class, 'store']);
+    Route::get('/case-deadlines/{id}', [CaseDeadlineController::class, 'show']);
+    Route::put('/case-deadlines/{id}', [CaseDeadlineController::class, 'update']);
+    Route::delete('/case-deadlines/{id}', [CaseDeadlineController::class, 'destroy']);
 });
