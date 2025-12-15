@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 
 use App\Http\Controllers\Api\Admin\UserPermissionController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\CaseController;
 
 Route::prefix('auth')->group(function () {
     
@@ -31,4 +32,12 @@ Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(funct
     Route::get('/clients/{id}', [ClientController::class, 'show']);
     Route::put('/clients/{id}', [ClientController::class, 'update']);
     Route::delete('/clients/{id}', [ClientController::class, 'destroy']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin,advogado,recepcao'])->group(function () {
+    Route::get('/cases', [CaseController::class, 'index']);
+    Route::post('/cases', [CaseController::class, 'store']);
+    Route::get('/cases/{id}', [CaseController::class, 'show']);
+    Route::put('/cases/{id}', [CaseController::class, 'update']);
+    Route::delete('/cases/{id}', [CaseController::class, 'destroy']);
 });
