@@ -6,6 +6,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Support\Normalizer;
+
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
@@ -28,6 +30,11 @@ class User extends Authenticatable
         return [
             'can_access_finance' => 'boolean',
         ];
+    }
+
+    protected function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = Normalizer::email($value);
     }
 }
 
