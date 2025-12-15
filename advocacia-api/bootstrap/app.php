@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'finance.access' => \App\Http\Middleware\FinanceAccessMiddleware::class,
         ]);
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
