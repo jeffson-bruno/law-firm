@@ -77,6 +77,7 @@ export const auth = {
   async logout() {
     const data = await request<{ message: string }>("/api/auth/logout", { method: "POST" });
     setToken(null);
+    clearMeCache();
     return data;
   },
 };
@@ -114,3 +115,17 @@ export const dashboard = {
     return request<any>("/api/dashboard/deadlines-week");
   },
 };
+
+// Cache leve do /me (evita bater no endpoint a cada troca de rota)
+let meCache: { user: any; flags: any } | null = null;
+
+export async function getMeCached(force = false) {
+  if (!force && meCache) return meCache;
+  const data = await auth.me();
+  meCache = data;
+  return data;
+}
+
+export function clearMeCache() {
+  meCache = null;
+}

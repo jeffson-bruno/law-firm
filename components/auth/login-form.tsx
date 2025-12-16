@@ -1,23 +1,22 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { auth, clearMeCache, getMeCached } from "@/lib/api"
 
 type UserRole = "recepcao" | "advogado" | "admin"
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState<UserRole>("recepcao")
   const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter()
   const { toast } = useToast()
 
@@ -25,22 +24,45 @@ export function LoginForm() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      // limpa cache do /me se existir
+      clearMeCache?.()
 
-      // Store user info in localStorage (in production, use proper auth)
+      // login real (Sanctum Bearer)
+      await auth.login({
+        username,
+        password,
+        device_name: "next-web",
+      })
+
+      // pega user + flags
+      const me = await getMeCached(true)
+      const role = me?.user?.role as UserRole | undefined
+
+      if (!role) {
+        throw new Error("Não foi possível identificar o perfil do usuário.")
+      }
+
+      // opcional: guardar infos úteis pro front (sidebar)
       localStorage.setItem("userRole", role)
-      localStorage.setItem("userEmail", email)
+      localStorage.setItem("userUsername", me.user.username)
+      localStorage.setItem("flags", JSON.stringify(me.flags || {}))
 
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo ao sistema!`,
+        description: "Bem-vindo ao sistema!",
       })
 
-      // Redirect based on role
       router.push(`/${role}`)
-    }, 1000)
+    } catch (err: any) {
+      toast({
+        title: "Erro no login",
+        description: err?.message || "Não foi possível autenticar.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -52,28 +74,16 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="role">Perfil de Acesso</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger id="role">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recepcao">Recepção</SelectItem>
-                <SelectItem value="advogado">Advogado</SelectItem>
-                <SelectItem value="admin">Administrador</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="username">Usuário</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              placeholder="ex: admin01"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              minLength={5}
+              maxLength={10}
               required
+              autoComplete="username"
             />
           </div>
 
@@ -85,7 +95,10 @@ export function LoginForm() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              maxLength={16}
               required
+              autoComplete="current-password"
             />
           </div>
 
