@@ -23,6 +23,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { CalculatorPopover } from "@/components/shared/calculator-popover"
 
+import { useAuth } from "@/hooks/use-auth"
+
+
 type NavItem = {
   title: string
   href: string
@@ -32,6 +35,7 @@ type NavItem = {
 type AppSidebarProps = {
   role: "recepcao" | "advogado" | "admin"
 }
+
 
 const navigationByRole: Record<string, NavItem[]> = {
   recepcao: [
@@ -56,14 +60,31 @@ const navigationByRole: Record<string, NavItem[]> = {
   ],
 }
 
+
 export function AppSidebar({ role }: AppSidebarProps) {
   const pathname = usePathname()
-  const navigation = navigationByRole[role] || []
+
+  const { flags, loading } = useAuth()
+
+  if (loading) return null
+  
+  const baseNavigation = navigationByRole[role] || []
+
+  const navigation = baseNavigation.filter((item) => {
+    if (item.href.includes("/admin/financeiro")) return !!flags.show_finance
+    if (item.href.includes("/admin/relatorios")) return !!flags.show_reports
+    if (item.href.includes("/recepcao/marketing")) return !!flags.show_marketing
+    return true
+  })
+
 
   const handleLogout = () => {
     localStorage.clear()
+    document.cookie = "auth_token=; Max-Age=0; path=/"
+    document.cookie = "userRole=; Max-Age=0; path=/"
     window.location.href = "/"
   }
+
 
   return (
     <div className="flex h-full flex-col border-r bg-sidebar">

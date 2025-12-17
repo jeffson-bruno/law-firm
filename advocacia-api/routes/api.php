@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\CaseController;
 use App\Http\Controllers\Api\CaseDeadlineController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\Admin\UserController;
+
 
 Route::prefix('auth')->group(function () {
     
@@ -19,6 +21,12 @@ Route::prefix('auth')->group(function () {
     });
 
 });
+
+Route::middleware(['auth:sanctum', 'role:admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::post('/users', [UserController::class, 'store']);
+    });
 
 Route::middleware(['auth:sanctum', 'finance.access'])->get('/finance/ping', function () {
     return response()->json(['ok' => true, 'module' => 'finance']);

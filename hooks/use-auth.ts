@@ -21,8 +21,5 @@ export function useAuth() {
     user,
     flags,
     loading,
-    isAdmin: user?.role === "admin",
-    isAdvogado: user?.role === "advogado",
-    isRecepcao: user?.role === "recepcao",
   }
 }
