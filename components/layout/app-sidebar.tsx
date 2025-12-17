@@ -46,12 +46,14 @@ const navigationByRole: Record<string, NavItem[]> = {
   ],
   advogado: [
     { title: "Dashboard", href: "/advogado", icon: LayoutDashboard },
+    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Meus Casos", href: "/advogado/casos", icon: FileText },
     { title: "Cálculos", href: "/advogado/calculos", icon: Calculator },
     { title: "Kanban", href: "/advogado/kanban", icon: FolderKanban },
   ],
   admin: [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
     { title: "Kanban", href: "/admin/kanban", icon: FolderKanban },
@@ -67,7 +69,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
   const { flags, loading } = useAuth()
 
   if (loading) return null
-  
+
   const baseNavigation = navigationByRole[role] || []
 
   const navigation = baseNavigation.filter((item) => {
