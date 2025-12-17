@@ -48,6 +48,9 @@ export function LoginForm() {
       localStorage.setItem("userUsername", me.user.username)
       localStorage.setItem("flags", JSON.stringify(me.flags || {}))
 
+      document.cookie = `auth_token=${localStorage.getItem("auth_token")}; path=/; SameSite=Lax`;
+      document.cookie = `userRole=${role}; path=/; SameSite=Lax`;
+
       toast({
         title: "Login realizado com sucesso",
         description: "Bem-vindo ao sistema!",
