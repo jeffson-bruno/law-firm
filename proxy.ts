@@ -17,12 +17,21 @@ export function proxy(req: NextRequest) {
   const token = req.cookies.get("auth_token")?.value;
   const role = req.cookies.get("userRole")?.value;
 
+  // flags em cookie (vamos garantir no passo seguinte)
+  const showFinance = req.cookies.get("show_finance")?.value === "true";
+
   if (!token) {
     const url = req.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
+  // exceção: permitir /admin/financeiro para quem tem permissão financeira
+  if (pathname.startsWith("/admin/financeiro") && showFinance) {
+    return NextResponse.next();
+  }
+
+  // bloqueio padrão por role
   if (role && role !== requiredRole) {
     const url = req.nextUrl.clone();
     url.pathname = `/${role}`;

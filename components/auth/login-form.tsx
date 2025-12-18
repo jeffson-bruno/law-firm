@@ -43,13 +43,21 @@ export function LoginForm() {
         throw new Error("Não foi possível identificar o perfil do usuário.")
       }
 
-      // opcional: guardar infos úteis pro front (sidebar)
+      // salva infos úteis pro front (sidebar)
       localStorage.setItem("userRole", role)
       localStorage.setItem("userUsername", me.user.username)
       localStorage.setItem("flags", JSON.stringify(me.flags || {}))
 
-      document.cookie = `auth_token=${localStorage.getItem("auth_token")}; path=/; SameSite=Lax`;
-      document.cookie = `userRole=${role}; path=/; SameSite=Lax`;
+      // ✅ cookies para o proxy (guard de rotas)
+      const token = localStorage.getItem("auth_token") || ""
+      const flags = me?.flags || {}
+
+      document.cookie = `auth_token=${token}; path=/; SameSite=Lax`
+      document.cookie = `userRole=${role}; path=/; SameSite=Lax`
+
+      document.cookie = `show_finance=${flags.show_finance ? "true" : "false"}; path=/; SameSite=Lax`
+      document.cookie = `show_reports=${flags.show_reports ? "true" : "false"}; path=/; SameSite=Lax`
+      document.cookie = `show_marketing=${flags.show_marketing ? "true" : "false"}; path=/; SameSite=Lax`
 
       toast({
         title: "Login realizado com sucesso",

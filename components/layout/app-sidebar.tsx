@@ -40,6 +40,7 @@ type AppSidebarProps = {
 const navigationByRole: Record<string, NavItem[]> = {
   recepcao: [
     { title: "Dashboard", href: "/recepcao", icon: LayoutDashboard },
+    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Agendamentos", href: "/recepcao/agendamentos", icon: Calendar },
     { title: "Marketing", href: "/recepcao/marketing", icon: MessageSquare },
     { title: "Clientes", href: "/recepcao/clientes", icon: Users },
@@ -53,7 +54,6 @@ const navigationByRole: Record<string, NavItem[]> = {
   ],
   admin: [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
     { title: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
     { title: "Kanban", href: "/admin/kanban", icon: FolderKanban },
@@ -82,10 +82,16 @@ export function AppSidebar({ role }: AppSidebarProps) {
 
   const handleLogout = () => {
     localStorage.clear()
+
     document.cookie = "auth_token=; Max-Age=0; path=/"
     document.cookie = "userRole=; Max-Age=0; path=/"
+    document.cookie = "show_finance=; Max-Age=0; path=/"
+    document.cookie = "show_reports=; Max-Age=0; path=/"
+    document.cookie = "show_marketing=; Max-Age=0; path=/"
+
     window.location.href = "/"
   }
+
 
 
   return (
