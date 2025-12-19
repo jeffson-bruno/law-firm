@@ -14,7 +14,7 @@ function setToken(token: string | null) {
   else localStorage.setItem("auth_token", token);
 }
 
-async function request<T>(
+export async function request<T>(
   path: string,
   options: {
     method?: HttpMethod;
@@ -116,6 +116,14 @@ export const dashboard = {
   },
 };
 
+/** Admin */
+export const admin = {
+  async dashboard() {
+    return request<any>("/api/admin/dashboard");
+  },
+};
+
+
 // Cache leve do /me (evita bater no endpoint a cada troca de rota)
 let meCache: { user: any; flags: any } | null = null;
 
@@ -129,3 +137,4 @@ export async function getMeCached(force = false) {
 export function clearMeCache() {
   meCache = null;
 }
+
