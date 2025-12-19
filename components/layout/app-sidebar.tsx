@@ -40,21 +40,21 @@ type AppSidebarProps = {
 const navigationByRole: Record<string, NavItem[]> = {
   recepcao: [
     { title: "Dashboard", href: "/recepcao", icon: LayoutDashboard },
-    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
+    { title: "Financeiro", href: "/financeiro", icon: DollarSign },
     { title: "Agendamentos", href: "/recepcao/agendamentos", icon: Calendar },
     { title: "Marketing", href: "/recepcao/marketing", icon: MessageSquare },
     { title: "Clientes", href: "/recepcao/clientes", icon: Users },
   ],
   advogado: [
     { title: "Dashboard", href: "/advogado", icon: LayoutDashboard },
-    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
+    { title: "Financeiro", href: "/financeiro", icon: DollarSign },
     { title: "Meus Casos", href: "/advogado/casos", icon: FileText },
     { title: "Cálculos", href: "/advogado/calculos", icon: Calculator },
     { title: "Kanban", href: "/advogado/kanban", icon: FolderKanban },
   ],
   admin: [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { title: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
+    { title: "Financeiro", href: "/financeiro", icon: DollarSign },
     { title: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
     { title: "Kanban", href: "/admin/kanban", icon: FolderKanban },
     { title: "Processos", href: "/admin/processos", icon: FileText },
