@@ -26,7 +26,7 @@ class DashboardController extends Controller
             ],
 
             "quickActions" => [
-                ["key" => "novo_cliente", "label" => "Cadastrar cliente", "href" => "/recepcao/clientes"],
+                ["key" => "novo_cliente", "label" => "Cadastrar cliente", "href" => "/admin/clientes"],
                 ["key" => "novo_processo", "label" => "Novo processo", "href" => "/admin/processos"],
                 ["key" => "relatorios", "label" => "Gerar relatório", "href" => "/admin/relatorios"],
                 ["key" => "financeiro", "label" => "Controle financeiro", "href" => "/financeiro"],
