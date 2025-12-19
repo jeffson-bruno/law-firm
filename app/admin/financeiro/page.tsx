@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   DollarSign,
   Plus,
@@ -12,6 +14,7 @@ import {
   ArrowDownRight,
   Settings,
 } from "lucide-react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,11 +31,46 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+import { useAuth } from "@/hooks/use-auth"
+
+type Role = "admin" | "advogado" | "recepcao"
 
 export default function FinanceiroPage() {
-  const [selectedMonth, setSelectedMonth] = useState("12/2024")
+  const router = useRouter()
   const { toast } = useToast()
+
+  const [selectedMonth, setSelectedMonth] = useState("12/2024")
+  const [role, setRole] = useState<Role | null>(null)
+
+  const { flags, loading } = useAuth()
+
+  useEffect(() => {
+    // role vem do seu login-form (localStorage.setItem("userRole", role))
+    const stored = (typeof window !== "undefined" && localStorage.getItem("userRole")) as Role | null
+    setRole(stored)
+  }, [])
+
+  const basePath = useMemo(() => {
+    if (role === "admin") return "/admin"
+    if (role === "advogado") return "/advogado"
+    if (role === "recepcao") return "/recepcao"
+    return "/"
+  }, [role])
+
+  // 🔒 Se não tiver permissão pro financeiro, sai da página
+  useEffect(() => {
+    if (loading) return
+    if (!flags?.show_finance) {
+      // manda pra home do perfil (ex: /advogado)
+      router.replace(basePath)
+    }
+  }, [loading, flags?.show_finance, router, basePath])
+
+  // enquanto carrega auth/flags, evita “piscar” conteúdo
+  if (loading) return null
+
+  // se não tem finance, o effect acima redireciona
+  if (!flags?.show_finance) return null
 
   const cashFlow = [
     {
@@ -99,6 +137,8 @@ export default function FinanceiroPage() {
     })
   }
 
+  const canSeeMarketingActions = !!flags?.show_marketing && role === "recepcao"
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -106,6 +146,7 @@ export default function FinanceiroPage() {
           <h1 className="text-3xl font-bold text-balance">Controle Financeiro</h1>
           <p className="text-muted-foreground text-pretty">Gestão completa das finanças do escritório</p>
         </div>
+
         <Dialog>
           <DialogTrigger asChild>
             <Button>
@@ -113,11 +154,13 @@ export default function FinanceiroPage() {
               Nova Transação
             </Button>
           </DialogTrigger>
+
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Adicionar Transação</DialogTitle>
               <DialogDescription>Registre uma nova entrada ou saída no caixa</DialogDescription>
             </DialogHeader>
+
             <form
               className="space-y-4"
               onSubmit={(e) => {
@@ -137,10 +180,12 @@ export default function FinanceiroPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição</Label>
                 <Input id="description" placeholder="Descrição da transação" required />
               </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="value">Valor (R$)</Label>
@@ -151,6 +196,7 @@ export default function FinanceiroPage() {
                   <Input id="date" type="date" required />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="category">Categoria</Label>
                 <Select required>
@@ -165,6 +211,7 @@ export default function FinanceiroPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="flex justify-end gap-3">
                 <Button type="button" variant="outline">
                   Cancelar
@@ -184,12 +231,21 @@ export default function FinanceiroPage() {
               <p className="text-xl font-bold text-primary">Admin Principal</p>
               <p className="text-xs text-muted-foreground mt-1">Definido nas configurações do sistema</p>
             </div>
-            <Link href="/admin/configuracoes">
-              <Button variant="outline" size="sm">
+
+            {/* 🔐 Só admin pode ir em configurações */}
+            {role === "admin" ? (
+              <Link href="/admin/configuracoes">
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Alterar
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" disabled title="Apenas admin pode alterar isso.">
                 <Settings className="h-4 w-4 mr-2" />
                 Alterar
               </Button>
-            </Link>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -261,6 +317,7 @@ export default function FinanceiroPage() {
                 </Select>
               </div>
             </CardHeader>
+
             <CardContent>
               <div className="space-y-3">
                 {cashFlow.map((item) => (
@@ -295,6 +352,7 @@ export default function FinanceiroPage() {
                         </div>
                       </div>
                     </div>
+
                     <p className={`text-xl font-bold ${item.type === "entrada" ? "text-success" : "text-destructive"}`}>
                       {item.type === "entrada" ? "+" : "-"}R$ {item.value.toLocaleString("pt-BR")}
                     </p>
@@ -313,14 +371,19 @@ export default function FinanceiroPage() {
                   <CardTitle>Controle de Pagamentos</CardTitle>
                   <CardDescription>Pagamentos pendentes e realizados por clientes</CardDescription>
                 </div>
-                <Link href="/recepcao/marketing">
-                  <Button variant="outline" size="sm">
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar Cobrança
-                  </Button>
-                </Link>
+
+                {/* ✅ Só quem tem marketing (recepção) vê ações de cobrança */}
+                {canSeeMarketingActions ? (
+                  <Link href="/recepcao/marketing">
+                    <Button variant="outline" size="sm">
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar Cobrança
+                    </Button>
+                  </Link>
+                ) : null}
               </div>
             </CardHeader>
+
             <CardContent>
               <div className="space-y-4">
                 {clientPayments.map((payment) => (
@@ -338,6 +401,7 @@ export default function FinanceiroPage() {
                         {payment.status === "paid" ? "Pago" : payment.status === "partial" ? "Parcial" : "Pendente"}
                       </Badge>
                     </div>
+
                     <div className="grid gap-3 md:grid-cols-3 mb-3">
                       <div className="bg-secondary/50 p-3 rounded">
                         <p className="text-xs text-muted-foreground mb-1">Valor Total</p>
@@ -352,15 +416,19 @@ export default function FinanceiroPage() {
                         <p className="text-lg font-bold text-foreground">{payment.dueDate}</p>
                       </div>
                     </div>
+
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" className="flex-1 bg-transparent">
                         Registrar Pagamento
                       </Button>
-                      <Link href="/recepcao/marketing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full bg-transparent">
-                          Enviar Lembrete
-                        </Button>
-                      </Link>
+
+                      {canSeeMarketingActions ? (
+                        <Link href="/recepcao/marketing" className="flex-1">
+                          <Button size="sm" variant="outline" className="w-full bg-transparent">
+                            Enviar Lembrete
+                          </Button>
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
                 ))}
